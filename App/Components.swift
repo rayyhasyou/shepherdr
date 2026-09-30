@@ -91,15 +91,16 @@ struct MachineHeader: View {
                     ScrollView {
                         VStack(spacing: 0) {
                             ForEach(workspaces) { workspace in
+                                let agentCount = state.agents.filter { $0.workspaceID == workspace.id }.count
                                 HStack(spacing: 8) {
                                     Image(systemName: "folder").foregroundStyle(.secondary)
                                     Text(workspace.name).fontWeight(.medium).lineLimit(1)
                                     Text(workspace.directory ?? workspace.id)
                                         .foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
                                     Spacer(minLength: 8)
-                                    Text("\(state.agents.filter { $0.workspaceID == workspace.id }.count) agents")
+                                    Text("\(agentCount) \(agentCount == 1 ? "agent" : "agents")")
                                         .monospacedDigit()
-                                    Text("· \(workspace.tabCount) tabs · \(workspace.paneCount) panes")
+                                    Text("· \(workspace.tabCount) \(workspace.tabCount == 1 ? "tab" : "tabs") · \(workspace.paneCount) \(workspace.paneCount == 1 ? "pane" : "panes")")
                                         .foregroundStyle(.secondary)
                                 }
                                 .font(.callout).padding(.vertical, 5)

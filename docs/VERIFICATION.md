@@ -1,6 +1,6 @@
 # v0 verification
 
-Validated on macOS 26.6.2 (Apple Silicon), using Xcode 27.0 / Swift 6.4. Deployment target is macOS 14; an actual macOS 14 runtime has not been tested.
+Validated on 2026-09-30 on macOS 26.6.2 (Apple Silicon), using Xcode 27.0 / Swift 6.4. Deployment target is macOS 14; an actual macOS 14 runtime has not been tested.
 
 ## Automated and live checks
 
@@ -12,6 +12,13 @@ Validated on macOS 26.6.2 (Apple Silicon), using Xcode 27.0 / Swift 6.4. Deploym
 
 ## UI verification
 
-Pending interactive verification: the computer was locked when the built app was first opened for inspection. The completed build and unit tests do not substitute for that check.
+The built native application was opened and inspected interactively:
 
-The remaining check is to inspect the real Local workspace and exercise a synthetic cluster through an injected CLI: table layout, search, state/workspace filters, sorting, inspector, refresh, stale retention and recovery.
+- **Real installation:** All Agents showed Local as online and the expected empty agent state. Selecting Local displayed its actual workspace, directory, tab and pane counts, Herdr version and default session.
+- **Synthetic cluster:** a separate disposable app copy used `SHEPHERDR_HERDR_PATH` to query an isolated fixture executable. Local and a remote profile supplied agents; another profile reported Herdr not running; a disabled profile stayed visible. No real Herdr configuration was changed.
+- **Navigation and inspection:** checked All Agents, machine selection, workspace filtering, search by machine, the Blocked filter, and the metadata inspector. Machine/workspace ownership and routing identifiers matched the fixtures. Blocked agents appeared first with restrained orange emphasis.
+- **Partial failure:** after a remote became unreachable, its four cached agents remained visible and marked stale while Local continued updating. The machine view exposed the error and last-received timestamp; summary counts excluded stale data.
+- **Refresh and recovery:** pausing automatic refresh preserved the displayed snapshot. Manual refresh then recovered the remote and replaced cached rows, clearing stale markers.
+- **Scale and layout:** checked 60 aggregate agents across two reachable machines, including unknown and future lifecycle values displayed as Unknown. Inspected a roughly 900 × 550 window with the inspector open: native horizontal table scrolling and vertical inspector scrolling kept content accessible.
+
+The synthetic cluster validates application behavior, not a real SSH connection. No saved remote machine or real running coding agent was available during verification. Real multi-host forwarding remains an integration check for a compatible Herdr installation; the locally installed Herdr 0.9.0 lacks the documented `--machine` option.
