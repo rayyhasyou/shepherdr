@@ -10,6 +10,8 @@ Inspected on 2026-09-29 before implementation:
 - [Agents](https://herdr.dev/docs/agents/).
 - Installed Herdr 0.9.0: `api schema --json`, `api snapshot`, `status server --json`, `machine list --json`, and a read-only probe of `--machine` support.
 
+Rechecked on 2026-10-01 with installed CLI 0.9.3: `--machine` is supported, and the unchanged Shepherdr probe successfully reads the existing local 0.9.0 server. Herdr reports that server as compatible with no restart required.
+
 ## Commands and envelopes
 
 | Purpose | Invocation | Consumed shape |
@@ -19,7 +21,7 @@ Inspected on 2026-09-29 before implementation:
 | Remote session | `herdr --machine <opaque-profile-id> api snapshot` | Same snapshot envelope, remote session chosen by Herdr |
 | Diagnose older local socket failures | `herdr status server --json` | `running`, `compatible` |
 
-Every invocation uses an executable URL and an argument array. There is no shell interpolation, SSH implementation, TUI scraping or parsing of human listings. Herdr owns forwarding, saved session selection and protocol negotiation. The older installed 0.9.0 CLI rejects `--machine`; current upstream documents and implements it. There is no fallback from a failed remote request to Local.
+Every invocation uses an executable URL and an argument array. There is no shell interpolation, SSH implementation, TUI scraping or parsing of human listings. Herdr owns forwarding, saved session selection and protocol negotiation. The originally inspected 0.9.0 CLI rejects `--machine`; installed CLI 0.9.3 supports it. There is no fallback from a failed remote request to Local.
 
 API failures can be JSON on stderr with a nonzero exit status. Decode those envelopes first. Older CLI usage errors have exit status 2 without an envelope; these are reported as incompatible commands. Unstructured transport diagnostics are shown as details, not parsed into agent data. Remote authentication, install and bridge failures without a structured error remain actionable **Unreachable** states. No hidden interactive input is possible: stdin is closed and SSH askpass is disabled.
 

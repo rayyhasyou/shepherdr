@@ -20,7 +20,9 @@ Read-only: no terminal, prompts, agent/workspace creation, worktree management, 
 - macOS 14 Sonoma or later.
 - Xcode 16 or later, with its license accepted and first-launch components installed.
 - A locally installed `herdr` supporting `machine list --json` and `api snapshot`.
-- For remote machines, a local Herdr build with the documented global `--machine` option, plus compatible remote installations and an already-running server. **The locally verified Herdr 0.9.0 supports snapshots but does not support `--machine`.** Use a newer build providing that option for remote monitoring. Shepherdr shows an incompatibility message on older CLIs.
+- For remote machines, a local Herdr build with the documented global `--machine` option, plus compatible remote installations and an already-running server. Herdr CLI 0.9.3 provides that option; 0.9.0 does not. Shepherdr shows an incompatibility message on older CLIs.
+
+Local integration has been verified with CLI 0.9.3 querying an existing, compatible 0.9.0 server. Updating the CLI does not require replacing a compatible running server.
 
 No package dependencies, API keys, accounts, or server-side Shepherdr service are required.
 
