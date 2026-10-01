@@ -15,10 +15,18 @@ Open **All Agents** to see who is working, who needs attention, and which worksp
 
 Read-only: no terminal, prompts, agent/workspace creation, worktree management, machine management, notifications, or menu-bar UI.
 
+## Download and install
+
+Download the `.dmg` from [the latest GitHub release](https://github.com/rayyhasyou/shepherdr/releases/latest), open it, and drag **Shepherdr.app** to **Applications**. A `.zip` of the same app and SHA-256 checksums are also available. Requires **Apple Silicon (M1 or later) and macOS 14 Sonoma or later**; no Xcode is needed to run the download.
+
+Current downloads have an **ad hoc signature and are not notarized by Apple**. If macOS blocks the first launch because the developer cannot be verified and you trust this download, use **System Settings → Privacy & Security → Open Anyway** for Shepherdr. Follow [Apple's instructions](https://support.apple.com/en-us/102445); managed Macs may require administrator approval.
+
+Install and start Herdr separately, then open Shepherdr. The app reads your existing sessions and saved machines.
+
 ## Requirements
 
 - macOS 14 Sonoma or later.
-- Xcode 16 or later, with its license accepted and first-launch components installed.
+- To build from source: Xcode 16 or later, with its license accepted and first-launch components installed.
 - A locally installed `herdr` supporting `machine list --json` and `api snapshot`.
 - For remote machines, a local Herdr build with the documented global `--machine` option, plus compatible remote installations and an already-running server. Herdr CLI 0.9.3 provides that option; 0.9.0 does not. Shepherdr shows an incompatibility message on older CLIs.
 
@@ -55,7 +63,7 @@ swift build --product shepherdr
 swift run shepherdr
 ```
 
-Use the Xcode-built `.app` for normal Dock/Finder use. Distribution signing and notarization are outside v0.
+Use the Xcode-built `.app` for normal Dock/Finder use. See [releasing](docs/RELEASING.md) for the automated Apple Silicon packages and their signing status.
 
 ## Connect Herdr
 
