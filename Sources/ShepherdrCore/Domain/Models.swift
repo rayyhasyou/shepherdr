@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Machine: Identifiable, Hashable, Sendable {
+public struct Machine: Identifiable, Hashable, Codable, Sendable {
     public let profileID: String?
     public let name: String
     public let target: String?
@@ -81,6 +81,15 @@ public struct MachineSnapshot: Equatable, Sendable {
     public let protocolVersion: Int
     public let workspaces: [Workspace]
     public let agents: [Agent]
+    public let panes: [TerminalPane]
+
+    public init(version: String, protocolVersion: Int, workspaces: [Workspace], agents: [Agent], panes: [TerminalPane] = []) {
+        self.version = version
+        self.protocolVersion = protocolVersion
+        self.workspaces = workspaces
+        self.agents = agents
+        self.panes = panes
+    }
 }
 
 public enum ConnectionState: String, Sendable {

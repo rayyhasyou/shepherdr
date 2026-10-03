@@ -1,4 +1,18 @@
-# v0 verification
+# Verification
+
+## Interactive terminals (0.2.0)
+
+Validated on 2026-10-03 on the same Apple Silicon host with Xcode 27 / Swift 6.4:
+
+- `swift test` and the README's `xcodebuild … test` command — **35 tests in 5 suites passed**, including the native application build.
+- Terminal tests cover structured frames and binary input, malformed frames, explicit local routing, safe quoting of SSH arguments, no forced takeover, shell panes without agents, streaming subprocess input/output, startup timeout, connection failure, observation/input isolation, mode changes, detach and reconnect.
+- A separate real Herdr 0.9.3 instance used temporary configuration/state and a newly created test workspace. A disposable app copy displayed its workspace and the live shell prompt in a native **Observing** window.
+- A live harness using the actual `CLIHerdrClient` attached in control mode, sent a shell command, detached and reattached twice. It verified the same terminal ID and shell PID on both passes. The running shell survived each client disconnect.
+- Release packaging — **passed**: optimized arm64 build, ZIP extraction/signature check, bundled SwiftTerm license comparison, DMG verification and SHA-256 checksums.
+- The user's normal local server and active remote sessions were not changed. No authenticated remote terminal was available. SSH quoting and failure behavior are tested locally; real multi-host terminal transport remains unverified.
+- Automated GUI access became unavailable after verifying observation. Enabling input through the button and typing through the native view still need a manual end-to-end check; input/detach/reconnect are verified through the real transport and mocked store.
+
+## Dashboard (0.1.0)
 
 Validated on 2026-09-30 on macOS 26.6.2 (Apple Silicon), using Xcode 27.0 / Swift 6.4. Deployment target is macOS 14; an actual macOS 14 runtime has not been tested.
 

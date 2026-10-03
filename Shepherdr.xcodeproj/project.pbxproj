@@ -5,6 +5,25 @@
 	};
 	objectVersion = 56;
 	objects = {
+		A02D01000000000000000003 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = Tests/ShepherdrCoreTests/TerminalTests.swift;
+			sourceTree = "<group>";
+		};
+		A02D01000000000000000004 = {
+			isa = PBXBuildFile;
+			fileRef = A02D01000000000000000003;
+		};
+		A02D01000000000000000001 = {
+			isa = XCSwiftPackageProductDependency;
+			package = 582681C2EAE02B3F3D399C0C;
+			productName = ShepherdrTerminalUI;
+		};
+		A02D01000000000000000002 = {
+			isa = PBXBuildFile;
+			productRef = A02D01000000000000000001;
+		};
 		E3785987ADB1574119C54188 = {
 			isa = "PBXFileReference";
 			lastKnownFileType = "sourcecode.swift";
@@ -130,6 +149,7 @@
 			isa = "PBXSourcesBuildPhase";
 			buildActionMask = 2147483647;
 			files = (
+				A02D01000000000000000004,
 				"EB175CD0A8510FB7C3C21F5F",
 				"BA8B53A2BB0C7025FFF96852",
 				"57FEA94AD09177F5CF5AA65C",
@@ -141,6 +161,7 @@
 			isa = "PBXFrameworksBuildPhase";
 			buildActionMask = 2147483647;
 			files = (
+				A02D01000000000000000002,
 				"8BC5FA1B3F30BDC4F50E4F0E",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -223,7 +244,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright 2026 Shepherdr contributors";
 				CURRENT_PROJECT_VERSION = "1";
-				MARKETING_VERSION = "0.1.0";
+				MARKETING_VERSION = "0.2.0";
 				ENABLE_APP_SANDBOX = "NO";
 				ENABLE_HARDENED_RUNTIME = "YES";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -243,7 +264,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright 2026 Shepherdr contributors";
 				CURRENT_PROJECT_VERSION = "1";
-				MARKETING_VERSION = "0.1.0";
+				MARKETING_VERSION = "0.2.0";
 				ENABLE_APP_SANDBOX = "NO";
 				ENABLE_HARDENED_RUNTIME = "YES";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -312,6 +333,7 @@
 			);
 			name = "Shepherdr";
 			packageProductDependencies = (
+				A02D01000000000000000001,
 				"94A0426E8D3203DA5468CCF0",
 			);
 			productName = "Shepherdr";
@@ -351,6 +373,7 @@
 		4352443A37E80B3384E90F5D = {
 			isa = "PBXGroup";
 			children = (
+				A02D01000000000000000003,
 				"217543D048FED9A9481A0B81",
 				"9B4098D5F7825E6128D2EB2C",
 				"705E9329F08DECB1E1698499",

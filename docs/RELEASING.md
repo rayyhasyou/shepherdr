@@ -2,7 +2,7 @@
 
 The [Release workflow](../.github/workflows/release.yml) builds on a GitHub-hosted Apple Silicon Mac. It runs the tests, builds an optimized arm64 app for macOS 14+, embeds the tag's version and the workflow run number, applies an ad hoc signature, verifies the app after ZIP extraction, verifies the DMG, and produces SHA-256 checksums.
 
-The `.dmg` includes an Applications shortcut and installation instructions. The `.zip` contains the same `.app`. Neither package bundles Herdr or needs Xcode on the user's machine.
+The `.dmg` includes an Applications shortcut and installation instructions. The `.zip` contains the same `.app`. Both include the SwiftTerm renderer and its MIT notices. Neither package bundles Herdr or needs Xcode on the user's machine. Committed SwiftPM lockfiles pin the dependency revisions.
 
 ## Publish a version
 

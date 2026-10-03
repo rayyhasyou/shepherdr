@@ -21,9 +21,9 @@ Rechecked on 2026-10-01 with installed CLI 0.9.3: `--machine` is supported, and 
 | Remote session | `herdr --machine <opaque-profile-id> api snapshot` | Same snapshot envelope, remote session chosen by Herdr |
 | Diagnose older local socket failures | `herdr status server --json` | `running`, `compatible` |
 
-Every invocation uses an executable URL and an argument array. There is no shell interpolation, SSH implementation, TUI scraping or parsing of human listings. Herdr owns forwarding, saved session selection and protocol negotiation. The originally inspected 0.9.0 CLI rejects `--machine`; installed CLI 0.9.3 supports it. There is no fallback from a failed remote request to Local.
+Snapshot and catalog invocations use an executable URL and an argument array, without a shell. For snapshots, Herdr owns forwarding, saved session selection and protocol negotiation. The originally inspected 0.9.0 CLI rejects `--machine`; installed CLI 0.9.3 supports it. There is no fallback from a failed remote request to Local. Terminal streaming has a separate SSH adapter, described below. Neither path scrapes the TUI or parses human listings for application data.
 
-API failures can be JSON on stderr with a nonzero exit status. Decode those envelopes first. Older CLI usage errors have exit status 2 without an envelope; these are reported as incompatible commands. Unstructured transport diagnostics are shown as details, not parsed into agent data. Remote authentication, install and bridge failures without a structured error remain actionable **Unreachable** states. No hidden interactive input is possible: stdin is closed and SSH askpass is disabled.
+API failures can be JSON on stderr with a nonzero exit status. Decode those envelopes first. Older CLI usage errors have exit status 2 without an envelope; these are reported as incompatible commands. Unstructured transport diagnostics are shown as details, not parsed into agent data. Remote authentication, install and bridge failures without a structured error remain actionable **Unreachable** states. Snapshot/catalog stdin is closed and SSH askpass is disabled.
 
 ## Snapshot mapping
 
@@ -46,7 +46,26 @@ Queries run concurrently, each with a 12-second process deadline and an 8 MB out
 ## Deliberate limits
 
 - Local is the default session. Remote profiles each identify one session.
-- No live socket subscriptions in this CLI-only milestone.
+- No cluster event subscriptions; terminal windows do consume live CLI frame streams.
 - No persistence of cached session data across launches.
-- No changes to Herdr state or machine configuration.
+- No workspace/agent creation, machine configuration or server lifecycle management. Enabled terminal input and resizing affect the selected existing terminal through Herdr's API.
 - Actual multi-host SSH validation needs configured machines; automated tests exercise multiple synthetic machines and failures through the same store/client boundary.
+
+## Existing terminals (0.2)
+
+Inspected again on 2026-10-03 using Herdr CLI 0.9.3, its `terminal session` help, the public `src/client/terminal_sessions.rs` implementation and an isolated 0.9.3 server. The reference client [herdrm](https://github.com/missuo/herdrm) demonstrates daemon-owned terminals with native rendering; its current code uses Ghostty, while its README also mentions an earlier SwiftTerm implementation. Shepherdr uses its own adapter and SwiftTerm 1.10.1's AppKit renderer. No Herdr or herdrm implementation is copied.
+
+Local connections explicitly target the saved session and stable terminal ID:
+
+```sh
+herdr --session default terminal session observe TERMINAL_ID --cols 100 --rows 30
+herdr --session default terminal session control TERMINAL_ID --cols 100 --rows 30
+```
+
+Both commands stream newline-delimited JSON: `terminal.frame` includes `encoding: ansi`, `width`, `height`, `full` and base64 `bytes`; `terminal.closed` includes a reason. Control accepts `terminal.input` with base64 bytes and `terminal.resize` on stdin. Observation is read-only and cannot resize through stdin, so changing its viewport reopens that observer connection. Shepherdr never passes `--takeover`. Closing the window releases its client connection, not the server or shell.
+
+`herdr --machine PROFILE terminal session control …` is explicitly rejected as not API-backed by CLI 0.9.3. For remote streams, the transport therefore launches `/usr/bin/ssh -T` with the saved target, then invokes the remote installed Herdr executable with the same session/terminal arguments. A fixed POSIX script locates Herdr; every variable argument is quoted independently, including the outer `sh -c` command. Tests execute adversarial quoted values as literal arguments. User terminal input travels as JSON on stdin and is never interpolated into the SSH command. There is no remote PTY, install/bootstrap, password prompt, host-key bypass, or agent forwarding. Existing OpenSSH configuration and authentication apply.
+
+`HerdrTerminalClient` and `HerdrTerminalConnection` carry domain frames/input independently of the renderer. `TerminalStore` owns observation/control state, input ordering, resize debounce and reconnect. Each connection drains stdout/stderr asynchronously, requires an initial frame within 15 seconds, bounds records to 4 MB, diagnostics to 16 KB, pending writes to 1 MB, and buffered frames to eight. Backpressure fails visibly rather than silently discarding ANSI deltas. Reconnect starts with Herdr's fresh full frame. No terminal contents are logged or persisted by Shepherdr.
+
+The window supports keyboard input, paste, text selection and copying. It does not yet expose Herdr's historical scrollback or mouse reporting. Terminal escape sequences cannot write to the system clipboard through OSC 52. Clicked links are restricted to HTTP(S).

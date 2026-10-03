@@ -63,6 +63,7 @@ struct NoticeView: View {
 struct MachineHeader: View {
     let state: MachineState
     @Binding var workspaceID: String?
+    let openTerminal: (TerminalPane) -> Void
     @ViewState<Bool> private var showWorkspaces = true
 
     var body: some View {
@@ -102,6 +103,15 @@ struct MachineHeader: View {
                                         .monospacedDigit()
                                     Text("· \(workspace.tabCount) \(workspace.tabCount == 1 ? "tab" : "tabs") · \(workspace.paneCount) \(workspace.paneCount == 1 ? "pane" : "panes")")
                                         .foregroundStyle(.secondary)
+                                    Menu {
+                                        ForEach(state.snapshot?.panes.filter { $0.workspaceID == workspace.id } ?? []) { pane in
+                                            Button(pane.title, systemImage: "terminal") { openTerminal(pane) }
+                                        }
+                                    } label: { Image(systemName: "terminal") }
+                                    .menuStyle(.borderlessButton).fixedSize()
+                                    .disabled(state.connection != .online)
+                                    .help("Open a terminal in \(workspace.name)")
+                                    .accessibilityLabel("Open terminal in \(workspace.name)")
                                 }
                                 .font(.callout).padding(.vertical, 5)
                                 .accessibilityElement(children: .combine)

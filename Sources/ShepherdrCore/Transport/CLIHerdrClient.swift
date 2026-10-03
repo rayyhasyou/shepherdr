@@ -1,6 +1,6 @@
 import Foundation
 
-public struct CLIHerdrClient: HerdrClient {
+public struct CLIHerdrClient: HerdrClient, HerdrTerminalClient {
     private let runner: any CommandRunning
     private let executable: URL?
     private let timeout: TimeInterval
@@ -20,6 +20,11 @@ public struct CLIHerdrClient: HerdrClient {
         try validate(output, machine: .local)
         do { return try HerdrJSON.machines(output.stdout) }
         catch { throw decodingFailure(error) }
+    }
+
+    public func connect(to target: TerminalTarget, mode: TerminalMode, size: TerminalSize) async throws -> any HerdrTerminalConnection {
+        let command = try TerminalCommand.make(target: target, mode: mode, size: size, executable: executable)
+        return try await CLITerminalConnection.start(command: command, mode: mode)
     }
 
     public func snapshot(for machine: Machine) async throws -> MachineSnapshot {

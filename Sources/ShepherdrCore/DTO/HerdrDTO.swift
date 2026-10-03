@@ -110,6 +110,7 @@ enum HerdrJSON {
         try requireUnique(dto.workspaces.map(\.workspaceId), resource: "workspace")
         try requireUnique(dto.tabs.map(\.tabId), resource: "tab")
         try requireUnique(dto.panes.map(\.paneId), resource: "pane")
+        try requireUnique(dto.panes.map(\.terminalId), resource: "terminal")
         try requireUnique(dto.agents.map(\.terminalId), resource: "agent")
         let workspaces = Dictionary(uniqueKeysWithValues: dto.workspaces.map { ($0.workspaceId, $0) })
         let tabs = Dictionary(uniqueKeysWithValues: dto.tabs.map { ($0.tabId, $0) })
@@ -138,7 +139,13 @@ enum HerdrJSON {
                           directory: item.worktree?.checkoutPath ?? dto.panes.first { $0.workspaceId == item.workspaceId }?.cwd,
                           tabCount: item.tabCount, paneCount: item.paneCount,
                           state: AgentState(reportedValue: item.agentStatus))
-            }, agents: agents)
+            }, agents: agents, panes: dto.panes.map { pane in
+                TerminalPane(terminalID: pane.terminalId, paneID: pane.paneId,
+                             workspaceID: pane.workspaceId,
+                             workspaceName: workspaces[pane.workspaceId]?.label.nonempty ?? pane.workspaceId,
+                             title: agents.first { $0.id.terminalID == pane.terminalId }?.name
+                                ?? "\(tabs[pane.tabId]?.label.nonempty ?? pane.tabId) · \(pane.paneId)")
+            })
     }
 
     private static func requireUnique(_ ids: [String], resource: String) throws {

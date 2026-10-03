@@ -1,5 +1,6 @@
 import SwiftUI
 import ShepherdrCore
+import ShepherdrTerminalUI
 
 // Use the public State property wrapper explicitly. This also supports SDKs that
 // export a same-named macro unavailable to standalone command-line toolchains.
@@ -25,5 +26,10 @@ struct ShepherdrApp: App {
                 Link("Herdr Documentation", destination: URL(string: "https://herdr.dev/docs/")!)
             }
         }
+
+        WindowGroup("Terminal", id: "terminal", for: TerminalTarget.self) { $target in
+            if let target { TerminalWindow(target: target) }
+        }
+        .defaultSize(width: 1_000, height: 680)
     }
 }

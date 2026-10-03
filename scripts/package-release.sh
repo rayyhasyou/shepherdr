@@ -43,6 +43,9 @@ plist="$app/Contents/Info.plist"
 
 mkdir -p "$app/Contents/Resources"
 cp LICENSE "$app/Contents/Resources/LICENSE"
+# Keep the terminal renderer's MIT notices in every downloadable app, independently
+# of SwiftPM's platform-specific resource bundle layout.
+cp Sources/ShepherdrTerminalUI/Resources/SwiftTerm-LICENSE "$app/Contents/Resources/SwiftTerm-LICENSE"
 # An ad hoc signature makes the arm64 bundle valid, but does not confer Developer ID trust.
 codesign --force --sign - --options runtime --timestamp=none "$app"
 codesign --verify --deep --strict --verbose=2 "$app"
@@ -52,6 +55,7 @@ mkdir "$work_dir/unpacked"
 ditto -x -k "dist/$asset.zip" "$work_dir/unpacked"
 codesign --verify --deep --strict --verbose=2 "$work_dir/unpacked/Shepherdr.app"
 cmp "$binary" "$work_dir/unpacked/Shepherdr.app/Contents/MacOS/Shepherdr"
+cmp Sources/ShepherdrTerminalUI/Resources/SwiftTerm-LICENSE "$work_dir/unpacked/Shepherdr.app/Contents/Resources/SwiftTerm-LICENSE"
 
 mkdir "$work_dir/dmg"
 ditto "$app" "$work_dir/dmg/Shepherdr.app"

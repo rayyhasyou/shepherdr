@@ -16,7 +16,10 @@ Do not disable Gatekeeper or remove quarantine globally.
 
 Install and start Herdr separately: https://herdr.dev/docs/
 Shepherdr reads your existing Herdr installation and saved machine profiles.
-It does not create, stop, or modify sessions. Xcode is not required to run it.
+Double-click an agent to observe its terminal. Enable Input to type or paste
+into that existing session. Closing a terminal window only detaches the client.
+Interactive terminals require compatible Herdr terminal session commands
+(verified with CLI/server 0.9.3). Xcode is not required to run Shepherdr.
 
 Downloads and source: https://github.com/rayyhasyou/shepherdr
 Shepherdr is an independent client, not an official Herdr application.

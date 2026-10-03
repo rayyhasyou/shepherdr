@@ -2,6 +2,7 @@ import SwiftUI
 import ShepherdrCore
 
 struct DashboardView: View {
+    @Environment(\.openWindow) private var openWindow
     @Bindable var store: ClusterStore
     @ViewState<String?> private var destination = "all"
     @ViewState<Agent.ID?> private var selection: Agent.ID? = nil
@@ -38,7 +39,10 @@ struct DashboardView: View {
                                detail: failure.detail)
                 }
                 if let machine = selectedMachine {
-                    MachineHeader(state: machine, workspaceID: $workspaceID)
+                    MachineHeader(state: machine, workspaceID: $workspaceID) { pane in
+                        openWindow(id: "terminal", value: TerminalTarget(machine: machine.machine, terminalID: pane.terminalID,
+                                                                       title: pane.title, workspace: pane.workspaceName))
+                    }
                 } else {
                     summary
                     if store.machines.contains(where: { $0.failure != nil }) {
@@ -51,6 +55,13 @@ struct DashboardView: View {
             .navigationTitle(selectedMachine?.machine.name ?? "All Agents")
             .searchable(text: $search, placement: .toolbar, prompt: "Search agents, projects, machines")
             .toolbar {
+                ToolbarItem {
+                    Button("Open Terminal", systemImage: "terminal") {
+                        if let selectedRow { openTerminal(selectedRow) }
+                    }
+                    .disabled(selectedRow == nil || selectedRow?.isStale == true)
+                    .help("Open the selected agent’s live terminal")
+                }
                 ToolbarItem {
                     Picker("Agent state", selection: $stateFilter) {
                         Text("All States").tag("all")
@@ -249,11 +260,14 @@ struct DashboardView: View {
         }
         .contextMenu(forSelectionType: Agent.ID.self) { ids in
             if let id = ids.first {
+                if let row = store.agents.first(where: { $0.id == id }) {
+                    Button("Open Terminal") { openTerminal(row) }.disabled(row.isStale)
+                }
                 Button("Show Details") { selection = id; inspectorVisible = true }
             }
         } primaryAction: { ids in
             selection = ids.first
-            inspectorVisible = true
+            if let selectedRow { openTerminal(selectedRow) }
         }
         .overlay {
             if rows.isEmpty { emptyState.padding(30).allowsHitTesting(false) }
@@ -302,5 +316,12 @@ struct DashboardView: View {
     private func configureRefresh() {
         store.automaticRefresh = refreshSeconds > 0
         store.refreshInterval = TimeInterval(max(5, refreshSeconds))
+    }
+
+    private func openTerminal(_ row: AgentRow) {
+        guard !row.isStale, let machine = store.machines.first(where: { $0.id == row.id.machineID }),
+              machine.connection == .online else { return }
+        openWindow(id: "terminal", value: TerminalTarget(machine: machine.machine, terminalID: row.id.terminalID,
+                                                       title: row.name, workspace: row.workspace))
     }
 }
