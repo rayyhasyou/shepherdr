@@ -1,5 +1,16 @@
 # Verification
 
+## Session priorities (0.3.0)
+
+Validated on 2026-10-03:
+
+- `swift test` and the README's Xcode test command — **40 tests in 6 suites passed**, including the native application build.
+- Five new tests cover relaunch persistence, identical terminal IDs on different machines, late arrivals, missing sessions, filtered movement, boundaries, invalid preferences, duplicate identifiers, and aggregation through a mock Herdr client during failures and recovery.
+- A disposable app copy with a separate bundle identifier and synthetic local/remote machines displayed eight sessions with priorities. Via native accessibility automation, selecting the last remote session and clicking **Raise Priority** moved it from position 8 to 7; **⌥⌘↑** then moved it to 6. Selection and the enabled/disabled movement controls updated correctly.
+- Sorting by State kept saved priority numbers and disabled movement; sorting Priority ascending restored **My order** and its controls. In the remote machine view, moving that session to its first visible slot changed its global priority to 5 and disabled further upward movement. Returning to All Agents confirmed that the four hidden local sessions retained positions 1–4.
+- The GUI launch was slow and screenshot capture was unavailable. These checks verified accessibility state and control behavior; they do not claim a screenshot-based layout review. Preference reload and hidden-slot preservation were verified by automated tests.
+- This feature's GUI tests use a fixture executable, not the user's Herdr installation or active sessions.
+
 ## Interactive terminals (0.2.0)
 
 Validated on 2026-10-03 on the same Apple Silicon host with Xcode 27 / Swift 6.4:

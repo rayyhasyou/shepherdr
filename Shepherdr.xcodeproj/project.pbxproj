@@ -5,6 +5,16 @@
 	};
 	objectVersion = 56;
 	objects = {
+		A03001000000000000000001 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = Tests/ShepherdrCoreTests/SessionOrderTests.swift;
+			sourceTree = "<group>";
+		};
+		A03001000000000000000002 = {
+			isa = PBXBuildFile;
+			fileRef = A03001000000000000000001;
+		};
 		A02D01000000000000000003 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -149,6 +159,7 @@
 			isa = "PBXSourcesBuildPhase";
 			buildActionMask = 2147483647;
 			files = (
+				A03001000000000000000002,
 				A02D01000000000000000004,
 				"EB175CD0A8510FB7C3C21F5F",
 				"BA8B53A2BB0C7025FFF96852",
@@ -244,7 +255,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright 2026 Shepherdr contributors";
 				CURRENT_PROJECT_VERSION = "1";
-				MARKETING_VERSION = "0.2.0";
+				MARKETING_VERSION = "0.3.0";
 				ENABLE_APP_SANDBOX = "NO";
 				ENABLE_HARDENED_RUNTIME = "YES";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -264,7 +275,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright 2026 Shepherdr contributors";
 				CURRENT_PROJECT_VERSION = "1";
-				MARKETING_VERSION = "0.2.0";
+				MARKETING_VERSION = "0.3.0";
 				ENABLE_APP_SANDBOX = "NO";
 				ENABLE_HARDENED_RUNTIME = "YES";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -373,6 +384,7 @@
 		4352443A37E80B3384E90F5D = {
 			isa = "PBXGroup";
 			children = (
+				A03001000000000000000001,
 				A02D01000000000000000003,
 				"217543D048FED9A9481A0B81",
 				"9B4098D5F7825E6128D2EB2C",

@@ -1,6 +1,14 @@
 Native macOS dashboard and interactive terminals for agents across your Herdr machines.
 
-### New in 0.2.0
+### New in 0.3.0
+
+- Prioritize agent sessions with a persistent order across all machines. A new **Priority** column makes the order visible.
+- Raise/lower sessions using toolbar arrows or **⌥⌘↑ / ⌥⌘↓**, or use **Move to Top/Bottom** in the context menu.
+- Priorities survive app restarts, refreshes, lifecycle changes and temporarily missing machines. New sessions append to the end.
+- Reorder within a filtered list without moving hidden sessions. Column sorting remains available; **Show My Order** restores your priorities without losing them.
+- Preferences stay on this Mac and store only machine/terminal identifiers. No Herdr session changes are made by reordering.
+
+### Included from 0.2.0
 
 - Double-click an agent to open its live native terminal, or open any existing pane from the machine's workspace menu.
 - Observe first, then use **Enable Input** for keyboard/paste interaction. Switch back to **Observe Only**, disconnect or close the window without ending the pane.

@@ -7,9 +7,10 @@ Open **All Agents** to see who is working, who needs attention, and which worksp
 ## Features
 
 - Native SwiftUI split view, sortable agent table, search, lifecycle filters, and metadata inspector.
+- Persistent session priorities shared across the cluster, with move controls and keyboard shortcuts.
 - Local default session plus saved SSH machines from Herdr's machine catalog.
 - Machine views with workspace, tab and pane counts, including workspaces without agents.
-- Working, blocked, idle, done and unknown states; blocked agents sort first by default.
+- Working, blocked, idle, done and unknown states; **Sort by State** brings blocked agents to the top.
 - Concurrent queries, independent connection states, and last-known data marked stale after failure.
 - Automatic refresh (5, 15, 30 or 60 seconds), pause, manual refresh with **⌘R**, and refresh after wake.
 - Native terminal windows for existing agents and shell panes, locally or over SSH.
@@ -92,6 +93,16 @@ SHEPHERDR_HERDR_PATH=/absolute/path/to/herdr \
 
 Local executable discovery does not source shell startup files. Inherited `HERDR_SESSION`, `HERDR_SOCKET_PATH`, and pane/workspace/tab routing variables are cleared so opening Shepherdr from an agent pane cannot silently retarget Local. Herdr's own configuration environment is otherwise retained.
 
+## Prioritize sessions
+
+The **Priority** column shows your saved order across all machines. Select an agent session and use the toolbar arrows to raise or lower its priority, or press **⌥⌘↑ / ⌥⌘↓**. The context menu also offers **Move to Top** and **Move to Bottom**.
+
+Ordering is saved on this Mac and restored when you reopen Shepherdr. Newly discovered sessions join the end. Refreshes, lifecycle changes, temporary disconnections and an incomplete machine catalog do not erase existing positions. Priorities follow the machine profile and terminal ID, so sessions with identical names on different machines stay independent. A newly created terminal has a new identity and joins the end.
+
+You can reorder while searching or filtering by state, workspace or machine: movement is relative to the visible sessions, and hidden sessions retain their saved slots. Priority numbers refer to the current cluster as a whole, so a filtered list can have gaps. Clicking a column header temporarily sorts by that column without changing saved priorities. Choose **Show My Order** from the numbered-list toolbar menu (or sort Priority ascending) to resume manual ordering. Reordering controls are disabled during other column sorts.
+
+Only stable identifiers and their order are stored in the app's local preferences. Priorities are independent of Herdr state and are not synchronized between Macs.
+
 ## Interact with an existing session
 
 1. Double-click an agent, or select it and choose **Open Terminal** in the toolbar or context menu.
@@ -115,9 +126,9 @@ xcodebuild -project Shepherdr.xcodeproj \
 swift run shepherdr-probe
 ```
 
-Tests use Swift Testing, synthetic JSON fixtures, mock cluster/terminal clients, an injected command runner, and bounded real subprocess tests. They cover decoding, domain joins, all states, future states, duplicate IDs, aggregation, partial failures, stale retention, recovery, catalog failures, disabled/removed profiles, incremental results, cancellation, literal arguments, pipe draining, terminal JSON streams, observation/input boundaries, detach and reconnect. No running Herdr or SSH access is needed for the test suite.
+Tests use Swift Testing, synthetic JSON fixtures, mock cluster/terminal clients, isolated preferences, an injected command runner, and bounded real subprocess tests. They cover decoding, domain joins, all states, future states, duplicate IDs, aggregation, partial failures, stale retention, recovery, catalog failures, disabled/removed profiles, incremental results, cancellation, literal arguments, pipe draining, terminal JSON streams, observation/input boundaries, detach/reconnect, priority persistence and filtered reordering. No running Herdr or SSH access is needed for the test suite.
 
-Use the machine sidebar for failure details. A malformed response is **Incompatible**, never a successful empty session. Temporary failures keep cached rows visible with a stale marker and last-received timestamp. The summary counts exclude stale rows. Last-known snapshots are held in memory only; quitting clears them. The app does not collect telemetry or save session data to disk.
+Use the machine sidebar for failure details. A malformed response is **Incompatible**, never a successful empty session. Temporary failures keep cached rows visible with a stale marker and last-received timestamp. The summary counts exclude stale rows. Last-known snapshots are held in memory only; quitting clears them. The app does not collect telemetry or write snapshot/terminal contents to disk; saved priorities contain only session identifiers.
 
 ## Architecture
 
@@ -127,7 +138,7 @@ Sources/ShepherdrCore/
   Transport/                      CLI adapters, executable discovery, bounded process/stream transports
   DTO/                            JSON wire types, validation and domain mapping
   Domain/                         Machine, Workspace, Agent, lifecycle and failure models
-  Store/                          MainActor cluster state and individual terminal connections
+  Store/                          MainActor cluster state, local session priorities and terminal connections
 Sources/ShepherdrTerminalUI/       SwiftTerm AppKit renderer and SwiftUI terminal window
 Sources/ShepherdrProbe/            Read-only integration diagnostic
 Tests/ShepherdrCoreTests/          Protocol, transport and store regression tests

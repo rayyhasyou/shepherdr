@@ -9,10 +9,11 @@ typealias ViewState<Value> = SwiftUI.State<Value>
 @main
 struct ShepherdrApp: App {
     @ViewState<ClusterStore> private var store = ClusterStore()
+    @ViewState<SessionOrderStore> private var sessionOrder = SessionOrderStore()
 
     var body: some Scene {
         Window("Shepherdr", id: "cluster") {
-            DashboardView(store: store)
+            DashboardView(store: store, sessionOrder: sessionOrder)
                 .frame(minWidth: 880, minHeight: 500)
         }
         .defaultSize(width: 1_180, height: 720)

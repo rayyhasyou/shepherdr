@@ -47,7 +47,7 @@ public enum AgentState: String, CaseIterable, Sendable {
 }
 
 public struct Agent: Identifiable, Equatable, Sendable {
-    public struct ID: Hashable, Sendable {
+    public struct ID: Hashable, Codable, Sendable {
         public let machineID: String
         public let terminalID: String
     }
@@ -144,6 +144,7 @@ public struct AgentRow: Identifiable, Equatable, Sendable {
     public let machineName: String
     public let isStale: Bool
     public let lastSuccess: Date?
+    public var manualPriority: Int = 0
     public var id: Agent.ID { agent.id }
     public var name: String { agent.name }
     public var workspace: String { agent.workspaceName }

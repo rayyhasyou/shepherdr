@@ -4,13 +4,14 @@ import ShepherdrCore
 struct DashboardView: View {
     @Environment(\.openWindow) private var openWindow
     @Bindable var store: ClusterStore
+    @Bindable var sessionOrder: SessionOrderStore
     @ViewState<String?> private var destination = "all"
     @ViewState<Agent.ID?> private var selection: Agent.ID? = nil
     @ViewState<String?> private var workspaceID: String? = nil
     @ViewState<String> private var search = ""
     @ViewState<String> private var stateFilter = "all"
     @ViewState<Bool> private var inspectorVisible = false
-    @ViewState<[KeyPathComparator<AgentRow>]> private var sortOrder = [KeyPathComparator(\AgentRow.priority), KeyPathComparator(\AgentRow.name)]
+    @ViewState<[KeyPathComparator<AgentRow>]> private var sortOrder = [KeyPathComparator(\AgentRow.manualPriority)]
     @AppStorage("refreshSeconds") private var refreshSeconds = 5
 
     private var selectedMachine: MachineState? {
@@ -20,13 +21,15 @@ struct DashboardView: View {
         store.agents.filter { destination == "all" || $0.id.machineID == destination }
     }
     private var rows: [AgentRow] {
-        scopedAgents.filter {
-            (stateFilter == "all" || $0.agent.state.rawValue == stateFilter)
+        sessionOrder.ranked(store.agents).filter {
+            (destination == "all" || $0.id.machineID == destination)
+            && (stateFilter == "all" || $0.agent.state.rawValue == stateFilter)
             && (workspaceID == nil || $0.agent.workspaceID == workspaceID)
             && $0.matches(search)
         }.sorted(using: sortOrder)
     }
     private var selectedRow: AgentRow? { store.agents.first { $0.id == selection } }
+    private var isManualOrder: Bool { sortOrder.first == KeyPathComparator(\AgentRow.manualPriority) }
 
     var body: some View {
         NavigationSplitView {
@@ -55,6 +58,23 @@ struct DashboardView: View {
             .navigationTitle(selectedMachine?.machine.name ?? "All Agents")
             .searchable(text: $search, placement: .toolbar, prompt: "Search agents, projects, machines")
             .toolbar {
+                ToolbarItemGroup {
+                    Menu {
+                        Button("Show My Order") { sortOrder = [KeyPathComparator(\AgentRow.manualPriority)] }
+                        Button("Sort by State") { sortOrder = [KeyPathComparator(\AgentRow.priority), KeyPathComparator(\AgentRow.name)] }
+                    } label: {
+                        Label(isManualOrder ? "My Order" : "Column Sort", systemImage: "list.number")
+                    }
+                    .help("Return to your saved priorities or sort by lifecycle state")
+                    Button("Raise Priority", systemImage: "arrow.up") { moveSelection(.up) }
+                        .disabled(!canMove(selection, .up))
+                        .keyboardShortcut(.upArrow, modifiers: [.command, .option])
+                        .help(isManualOrder ? "Move above the previous visible session (⌥⌘↑)" : "Choose Show My Order to change priorities")
+                    Button("Lower Priority", systemImage: "arrow.down") { moveSelection(.down) }
+                        .disabled(!canMove(selection, .down))
+                        .keyboardShortcut(.downArrow, modifiers: [.command, .option])
+                        .help(isManualOrder ? "Move below the next visible session (⌥⌘↓)" : "Choose Show My Order to change priorities")
+                }
                 ToolbarItem {
                     Button("Open Terminal", systemImage: "terminal") {
                         if let selectedRow { openTerminal(selectedRow) }
@@ -109,6 +129,9 @@ struct DashboardView: View {
             await store.monitor()
         }
         .onChange(of: refreshSeconds) { configureRefresh() }
+        .onChange(of: store.agents.map(\.id), initial: true) {
+            sessionOrder.synchronize(with: store.agents.map(\.id))
+        }
         .onChange(of: destination) {
             workspaceID = nil
             selection = nil
@@ -224,6 +247,10 @@ struct DashboardView: View {
 
     private var agentTable: some View {
         Table(rows, selection: $selection, sortOrder: $sortOrder) {
+            TableColumn("Priority", value: \.manualPriority) { row in
+                Text("\(row.manualPriority)").monospacedDigit().foregroundStyle(.secondary)
+                    .help("Priority in your saved order across all machines")
+            }.width(60)
             TableColumn("Agent", value: \.name) { row in
                 VStack(alignment: .leading, spacing: 2) {
                     Text(row.name).fontWeight(.medium).lineLimit(1)
@@ -264,6 +291,11 @@ struct DashboardView: View {
                     Button("Open Terminal") { openTerminal(row) }.disabled(row.isStale)
                 }
                 Button("Show Details") { selection = id; inspectorVisible = true }
+                Divider()
+                Button("Raise Priority") { move(id, .up) }.disabled(!canMove(id, .up))
+                Button("Lower Priority") { move(id, .down) }.disabled(!canMove(id, .down))
+                Button("Move to Top") { move(id, .first) }.disabled(!canMove(id, .first))
+                Button("Move to Bottom") { move(id, .last) }.disabled(!canMove(id, .last))
             }
         } primaryAction: { ids in
             selection = ids.first
@@ -298,6 +330,8 @@ struct DashboardView: View {
     private var footer: some View {
         HStack(spacing: 6) {
             Text("\(rows.count) agent\(rows.count == 1 ? "" : "s")")
+            Text(isManualOrder ? "· My order" : "· Column sort")
+                .help("Priorities are saved on this Mac. Sorting columns does not change them.")
             if store.isRefreshing {
                 ProgressView().controlSize(.mini).scaleEffect(0.8)
                 Text("Refreshing…")
@@ -316,6 +350,20 @@ struct DashboardView: View {
     private func configureRefresh() {
         store.automaticRefresh = refreshSeconds > 0
         store.refreshInterval = TimeInterval(max(5, refreshSeconds))
+    }
+
+    private func canMove(_ id: Agent.ID?, _ direction: SessionOrderStore.Move) -> Bool {
+        isManualOrder && sessionOrder.canMove(id, direction, visibleIDs: rows.map(\.id))
+    }
+
+    private func moveSelection(_ direction: SessionOrderStore.Move) {
+        if let selection { move(selection, direction) }
+    }
+
+    private func move(_ id: Agent.ID, _ direction: SessionOrderStore.Move) {
+        guard isManualOrder else { return }
+        sessionOrder.move(id, direction, visibleIDs: rows.map(\.id))
+        selection = id
     }
 
     private func openTerminal(_ row: AgentRow) {
